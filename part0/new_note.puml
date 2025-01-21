@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam sequenceMessageAlign center
+
+browser -> server: POST Add a new note
+rnote right: payload added to data.json file
+server --> browser: URL redirect to //exampleapp/notes//
+
+browser -> server: GET //exampleapp/notes//
+server --> browser:  return HTML doc
+
+browser -> server: GET //main.css//
+server --> browser: return CSS file
+
+browser -> server: GET //main.js//
+server --> browser:  return JavaScript file
+
+browser -> server: GET //data.json//
+server --> browser:  return updated JSON data
+rnote left: the new note is rendered on the page
+
+@enduml

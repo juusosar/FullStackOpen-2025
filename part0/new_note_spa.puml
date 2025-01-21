@@ -1,0 +1,11 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+browser -> browser: Note is added to the page using JavaScript\n and the page rerendered
+browser -> server: POST JSON data to server
+rnote right: payload added to data.json file on the server
+
+@enduml

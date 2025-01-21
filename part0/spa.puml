@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam sequenceMessageAlign center
+
+browser -> server: GET //exampleapp/spa//
+server --> browser:  return HTML doc
+
+browser -> server: GET //main.css//
+server --> browser: return CSS file
+
+browser -> server: GET //spa.js//
+server --> browser:  return SPA JavaScript file
+
+browser -> server: GET //data.json//
+server --> browser:  return JSON data
+
+@enduml
