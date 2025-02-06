@@ -1,0 +1,3 @@
+[submodule "FullStackOpen2025-backend"]
+	path = FullStackOpen2025-backend
+	url = https://github.com/juusosar/FullStackOpen2025-backend.git
