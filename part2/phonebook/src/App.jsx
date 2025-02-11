@@ -51,7 +51,6 @@ const Persons = ({filter, removePerson}) => {
 }
 const App = () => {
     const [persons, setPersons] = useState([])
-    const [newId, setNewId] = useState(0)
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState('')
@@ -66,16 +65,6 @@ const App = () => {
                 setPersons(personsDB)
                 }
             )},[])
-
-    useEffect(() => findNextId(), [persons])
-
-    const findNextId = () => {
-        const highestId = persons.reduce((max, person) => Math.max(max, person.id), 0)
-        console.log(`highest id ${highestId}`)
-        console.log(`new id ${highestId + 1}`)
-        setNewId(highestId + 1)
-
-    }
 
     const handleNewNameChange = (e) => {
         setNewName(e.target.value)
@@ -115,6 +104,7 @@ const App = () => {
                         setTimeout(() => setNotificationMessage({'message': '', 'error': false}), 5000)
                     })
                     .catch(error => {
+                        console.log(error.response.data.error)
                         setNotificationMessage(
                             {
                                 'message':`Information of ${personToUpdate.name} has already been removed from server.`,
@@ -122,13 +112,15 @@ const App = () => {
                             })
                         setTimeout(() => setNotificationMessage({'message': '', 'error': false}), 5000)
                     })
+
+
             }
             setNewName('')
             setNewNumber('')
             return
         }
 
-        const newPerson = {id: String(newId), name: newName, number: newNumber}
+        const newPerson = { name: newName, number: newNumber }
 
         personService
             .create(newPerson)
@@ -141,6 +133,15 @@ const App = () => {
                     {
                         'message': `Added ${addedPerson.name}`,
                         'error': false
+                    })
+                setTimeout(() => setNotificationMessage({'message': '', 'error': false}), 5000)
+            })
+            .catch(error => {
+                console.log(error.response.data.error)
+                setNotificationMessage(
+                    {
+                        'message': error.response.data.error,
+                        'error': true
                     })
                 setTimeout(() => setNotificationMessage({'message': '', 'error': false}), 5000)
             })
