@@ -1,0 +1,31 @@
+{
+  "name": "bloglist",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/juusosar/FullStackOpen-2025#readme",
+  "bugs": {
+    "url": "https://github.com/juusosar/FullStackOpen-2025/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juusosar/FullStackOpen-2025.git"
+  },
+  "license": "ISC",
+  "author": "juusosar",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon --inspect index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.10.0"
+  }
+}
