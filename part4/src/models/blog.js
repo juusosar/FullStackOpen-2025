@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-mongoose.set('strictQuery',false)
 
 const blogSchema = new mongoose.Schema({
     title: {
@@ -19,6 +18,10 @@ const blogSchema = new mongoose.Schema({
     likes: {
         type: Number,
         required: false,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
     }
 })
 
