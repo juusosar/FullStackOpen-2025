@@ -77,7 +77,7 @@ describe('One user already in the db', () => {
     })
 })
 
-describe.only('Creating invalid users', () => {
+describe('Creating invalid users', () => {
 
     const test_post_invalid_user = async (user, errorMessage) => {
         const usersAtStart = await helper.usersInDb()

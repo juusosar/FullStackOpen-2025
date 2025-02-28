@@ -3,19 +3,39 @@ const assert = require('node:assert')
 const supertest = require('supertest')
 const mongoose = require('mongoose')
 const helper = require('./test_helper')
+const bcrypt = require("bcrypt")
+
 const app = require('../src/app')
 const api = supertest(app)
 
 const Blog = require("../src/models/blog")
+const User = require("../src/models/user")
+let TOKEN
 
 
 beforeEach(async () => {
-    await Blog.deleteMany({})
+    await User.deleteMany({})
 
+    const password = 'salanensalasana'
+    const passwordHash = await bcrypt.hash(password, 10)
+    let testUser = new User({ username: 'root', name: 'Superuser', passwordHash })
+    await testUser.save()
+
+    await Blog.deleteMany({})
     for (let blog of helper.initialBlogs) {
         let blogObj = new Blog(blog)
+        blogObj.user = testUser.id
         await blogObj.save()
     }
+
+    const res = await api
+        .post('/api/login')
+        .send({
+            username: testUser.username,
+            password: password
+        })
+
+    TOKEN = res.body.token
 })
 
 describe('Initializing blogs tests', () => {
@@ -60,6 +80,7 @@ describe('Adding blogs tests', () => {
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${TOKEN}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -71,9 +92,28 @@ describe('Adding blogs tests', () => {
         assert(contents.includes('New Fascinating Blog'))
     })
 
+    test('add blog with wrong token returns 401', async () => {
+        const newBlog = {
+            title: 'New Fascinating Blog',
+            author: 'Me',
+            url: 'https://www.me.com',
+            likes: 0
+        }
+
+        await api
+            .post('/api/blogs')
+            .set('token', '456456')
+            .send(newBlog)
+            .expect(401)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    })
+
     const test_post_invalid_blog = async (newBlog) => {
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${TOKEN}`)
             .send(newBlog)
             .expect(400)
 
@@ -121,6 +161,7 @@ describe('Adding blogs tests', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${TOKEN}`)
             .send(newBlog)
             .expect(201)
 
@@ -139,6 +180,9 @@ describe('Getting specific blogs tests', () => {
             .get(`/api/blogs/${blogToView.id}`)
             .expect(200)
             .expect('Content-Type', /application\/json/)
+
+        // User info is missing from initial blogs data
+        blogToView.user = res.body.user
 
         assert.deepStrictEqual(res.body, blogToView)
     })
@@ -189,6 +233,7 @@ describe('delete blog tests', () => {
 
         await api
             .delete(`/api/blogs/${blogToDelete.id}`)
+            .set('Authorization', `Bearer ${TOKEN}`)
             .expect(204)
 
         const blogsAtEnd = await helper.blogsInDb()
@@ -201,6 +246,7 @@ describe('delete blog tests', () => {
 
         await api
             .delete(`/api/blogs/${invalidId}`)
+            .set('Authorization', `Bearer ${TOKEN}`)
             .expect(404)
     })
 })
