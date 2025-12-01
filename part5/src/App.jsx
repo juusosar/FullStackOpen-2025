@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog.jsx'
 import Notification from './components/Notification.jsx'
+import Blog from './components/Blog.jsx'
+import Togglable from './components/Togglable.jsx'
+import LoginForm from './components/LoginForm.jsx'
+import BlogForm from './components/BlogForm.jsx'
 import blogService from './services/blogs.js'
 import loginService from './services/login.js'
 
@@ -11,17 +14,14 @@ const App = () => {
     const [user, setUser] = useState(null)
     const [error, setError] = useState(false)
     const [message, setMessage] = useState('')
-    const [title, setTitle] = useState('')
-    const [author, setAuthor] = useState('')
-    const [url, setUrl] = useState('')
-    
+
     const handleLogin = async event => {
         event.preventDefault()
-        
+
         try {
-            const user = await loginService.login({username, password})
+            const user = await loginService.login({ username, password })
             blogService.setToken(user.token)
-            
+
             window.localStorage.setItem('loggedInUser', JSON.stringify(user))
             setUser(user)
             setUsername('')
@@ -35,135 +35,47 @@ const App = () => {
             }, 5000)
         }
     }
-    
+
     const handleLogout = async event => {
         event.preventDefault()
-        
+
         window.localStorage.removeItem('loggedInUser')
         console.log('logged out')
     }
-    
-    const handleCreateBlog = async event => {
-        event.preventDefault()
-        
-        const blog = await blogService.create(
-            {
-                title: title,
-                author: author,
-                url: url
-            }
-        ).then(() => setMessage(`a new blog ${title} by ${author} added`))
-        
-        console.log('created new blog entry', blog)
-        
-        setTitle('')
-        setAuthor('')
-        setUrl('')
-        
-        setTimeout(() => {
-            setMessage('')
-        }, 5000)
-    }
-    
-    useEffect(() => {
-      blogService.getAll().then(blogs =>
-        setBlogs( blogs )
-      )
-    }, [handleCreateBlog])
-    
+
     useEffect(() => {
         const loggedUser = localStorage.getItem('loggedInUser')
         if (loggedUser) {
             const user = JSON.parse(loggedUser)
             setUser(user)
+            blogService.setToken(user.token)
         }
     },[])
-    
-    const loginForm = () => {
-        return (
-            <div>
-                <h2>Log in to application</h2>
-                <Notification message={message} error={error} />
-                <form onSubmit={handleLogin}>
-                    <div>
-                        <label>
-                            username
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={({ target }) => setUsername(target.value)}
-                            />
-                        </label>
-                    </div>
-                    <div>
-                        <label>
-                            password
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={({ target }) => setPassword(target.value)}
-                            />
-                        </label>
-                    </div>
-                    <button type="submit">login</button>
-                </form>
-            </div>
+
+    useEffect(() => {
+        blogService.getAll().then(blogs =>
+            setBlogs( blogs )
         )
-    }
-    
-    const blogForm = () => {
-        return (
-            <div>
-                <h2>create a new entry</h2>
-                <form onSubmit={handleCreateBlog}>
-                    <div>
-                        <label>
-                            title:
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={({ target }) => setTitle(target.value)}
-                            />
-                        </label>
-                    </div>
-                    <div>
-                        <label>
-                            author:
-                            <input
-                                type="text"
-                                value={author}
-                                onChange={({ target }) => setAuthor(target.value)}
-                            />
-                        </label>
-                     </div>
-                    <div>
-                        <label>
-                            url:
-                            <input
-                                type="text"
-                                value={url}
-                                onChange={({ target }) => setUrl(target.value)}
-                            />
-                        </label>
-                    </div>
-                    <button type="submit">create</button>
-                </form>
-                {blogs.map(blog =>
-                    <Blog key={blog.id} blog={blog} />
-                )}
-            </div>
-        )
-    }
+        console.log('getting all blogs', blogs)
+    }, [blogs])
+
 
     return (
         <div>
-            {!user && loginForm()}
+            {!user && LoginForm({ handleLogin, username, setUsername, password, setPassword, message, error })}
             {user && (
                 <div>
                     <h2>blogs</h2>
                     <Notification message={message} error={error} />
                     <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-                    {blogForm()}
+                    <Togglable buttonLabel='create new blog'>
+                        <BlogForm
+                            setMessage={setMessage}
+                        />
+                    </Togglable>
+                    {blogs.sort((a,b) => b.likes - a.likes).map(blog =>
+                        <Blog key={blog.id} blog={blog} user={user.name}/>
+                    )}
                 </div>
             )}
         </div>
