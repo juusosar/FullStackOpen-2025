@@ -59,7 +59,7 @@ const App = () => {
         )
         console.log('getting all blogs', blogs)
     }, [])
-    
+
     const addBlog = blogObject => {
         blogService.create({
             ...blogObject,
@@ -68,16 +68,16 @@ const App = () => {
             setBlogs(blogs.concat(returnedBlog))
             setMessage(`a new blog ${ returnedBlog.title } by ${ returnedBlog.author } added`)
         })
-        
+
         setTimeout(() => {
             setMessage('')
         }, 5000)
     }
-    
+
     const addLike = id => {
         const blogObject = blogs.find(blog => blog.id === id)
         if (!blogObject) return
-        
+
         blogService.update(blogObject.id, {
             ...blogObject,
             likes: blogObject.likes + 1
@@ -86,14 +86,14 @@ const App = () => {
                 blog.id === updatedBlog.id
                     ? { ...updatedBlog,  user: blogObject.user }
                     : blog
-                    ))
+            ))
         })
         console.log('like pressed for blog', blogObject)
     }
-    
+
     const removeBlog = id => {
         const blogObject = blogs.find(blog => blog.id === id)
-        
+
         if (window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}?`)) {
             blogService.remove(blogObject.id)
                 .then(code => {
@@ -103,7 +103,7 @@ const App = () => {
                 .catch(error => console.log('error removing blog:', error))
         }
     }
-    
+
     return (
         <div>
             {!user && LoginForm({ handleLogin, username, setUsername, password, setPassword, message, error })}
