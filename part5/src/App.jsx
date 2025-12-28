@@ -40,6 +40,7 @@ const App = () => {
         event.preventDefault()
 
         window.localStorage.removeItem('loggedInUser')
+        setUser(null)
         console.log('logged out')
     }
 
@@ -57,9 +58,52 @@ const App = () => {
             setBlogs( blogs )
         )
         console.log('getting all blogs', blogs)
-    }, [blogs])
-
-
+    }, [])
+    
+    const addBlog = blogObject => {
+        blogService.create({
+            ...blogObject,
+            user: user.id
+        }).then(returnedBlog => {
+            setBlogs(blogs.concat(returnedBlog))
+            setMessage(`a new blog ${ returnedBlog.title } by ${ returnedBlog.author } added`)
+        })
+        
+        setTimeout(() => {
+            setMessage('')
+        }, 5000)
+    }
+    
+    const addLike = id => {
+        const blogObject = blogs.find(blog => blog.id === id)
+        if (!blogObject) return
+        
+        blogService.update(blogObject.id, {
+            ...blogObject,
+            likes: blogObject.likes + 1
+        }).then(updatedBlog => {
+            setBlogs(blogs.map(blog =>
+                blog.id === updatedBlog.id
+                    ? { ...updatedBlog,  user: blogObject.user }
+                    : blog
+                    ))
+        })
+        console.log('like pressed for blog', blogObject)
+    }
+    
+    const removeBlog = id => {
+        const blogObject = blogs.find(blog => blog.id === id)
+        
+        if (window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}?`)) {
+            blogService.remove(blogObject.id)
+                .then(code => {
+                    setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
+                    console.log(`removed blog ${ blogObject.title } with status code ${ code }`)
+                })
+                .catch(error => console.log('error removing blog:', error))
+        }
+    }
+    
     return (
         <div>
             {!user && LoginForm({ handleLogin, username, setUsername, password, setPassword, message, error })}
@@ -68,13 +112,19 @@ const App = () => {
                     <h2>blogs</h2>
                     <Notification message={message} error={error} />
                     <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-                    <Togglable buttonLabel='create new blog'>
+                    <Togglable buttonLabel='create new blog' removeText='cancel'>
                         <BlogForm
-                            setMessage={setMessage}
+                            createBlog={addBlog}
                         />
                     </Togglable>
                     {blogs.sort((a,b) => b.likes - a.likes).map(blog =>
-                        <Blog key={blog.id} blog={blog} user={user.name}/>
+                        <Blog
+                            key={blog.id}
+                            blog={blog}
+                            user={user.name}
+                            addLike={addLike}
+                            removeBlog={removeBlog}
+                        />
                     )}
                 </div>
             )}

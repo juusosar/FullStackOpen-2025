@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import blogService from '../services/blogs.js'
+import Togglable from './Togglable.jsx'
 
-const Blog = ({ user, blog }) => {
+const Blog = ({ user, blog, addLike, removeBlog }) => {
     const blogStyle = {
         paddingTop: 10,
         paddingLeft: 2,
@@ -9,43 +9,34 @@ const Blog = ({ user, blog }) => {
         borderWidth: 1,
         marginBottom: 5
     }
-    const [blogVisible, setBlogVisible] = useState(false)
     const [likes, setLikes] = useState(blog.likes)
 
-    const hideWhenVisible = { display: blogVisible ? 'none' : '' }
-    const showWhenVisible = { display: blogVisible ? '' : 'none' }
-
-    const addLike = () => {
-        blogService.update(blog.id, {
-            ...blog,
-            likes: blog.likes + 1
-        }).then(newBlog => setLikes(newBlog.data.likes))
+    const handleAddLike = () => {
+        const newLikes = likes + 1
+        setLikes(newLikes)
+        
+        addLike(blog.id)
     }
-
-    const removeBlog = () => {
-        if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-            blogService.remove(blog.id)
-                .then(code => console.log(`removed blog ${blog.title} with status`, code))
-                .catch(error => console.log('error removing blog:', error))
-        }
+    
+    const handleRemoveBlog = () => {
+        removeBlog(blog.id)
     }
-
+    
     const removeButtonVisible = { display: user === blog.user.name ? '' : 'none' }
 
     return (
         <div style={blogStyle}>
             <div>
                 {blog.title} {blog.author}
-                <button style={hideWhenVisible} onClick={() => setBlogVisible(true)}>view</button>
-                <button style={showWhenVisible} onClick={() => setBlogVisible(false)}>hide</button>
-                <div style={showWhenVisible}>
-                    <div>{blog.url}</div>
-                    <div>likes {likes} <button onClick={addLike}>like</button></div>
-                    <div>{blog.user.name}</div>
-                    <button style={removeButtonVisible} onClick={removeBlog}>remove</button>
-                </div>
+                <Togglable buttonLabel="view details" removeText="hide details">
+                        <div>{blog.url}</div>
+                        <div>likes {likes} <button onClick={handleAddLike}>like</button></div>
+                        <div>{blog.user.name}</div>
+                        <button style={removeButtonVisible} onClick={handleRemoveBlog}>remove</button>
+                </Togglable>
             </div>
         </div>
     )}
 
 export default Blog
+
