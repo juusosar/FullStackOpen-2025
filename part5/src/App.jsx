@@ -65,7 +65,7 @@ const App = () => {
             ...blogObject,
             user: user.id
         }).then(returnedBlog => {
-            setBlogs(blogs.concat(returnedBlog))
+            setBlogs(blogs.concat({...returnedBlog, user: { id: user.id, name: user.name, username: user.username}}))
             setMessage(`a new blog ${ returnedBlog.title } by ${ returnedBlog.author } added`)
         })
 
