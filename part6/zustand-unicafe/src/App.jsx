@@ -1,15 +1,18 @@
-import { useState } from 'react'
 import Buttons from './components/Buttons'
 import Statistics from './components/Statistics'
 
+import useFeedbackStore from "./store.js";
+
 const App = () => {
-    const [good, setGood] = useState(0)
-    const [neutral, setNeutral] = useState(0)
-    const [bad, setBad] = useState(0)
-    const [total, setTotal] = useState(0)
-    const [average, setAverage] = useState(0)
-    const [positive, setPositive] = useState(0)
-    
+    const good = useFeedbackStore(state => state.good)
+    const neutral = useFeedbackStore(state => state.neutral)
+    const bad = useFeedbackStore(state => state.bad)
+    const actions = useFeedbackStore(state => state.actions)
+
+    const total = good + neutral + bad
+    const average = total === 0 ? 0 : (good - bad) / total
+    const positive = total === 0 ? 0 : good / total * 100
+
     const feedback = [
         {
             name: 'good',
@@ -32,42 +35,29 @@ const App = () => {
         },
         {
             name: 'average',
-            count: average / total,
+            count: average,
         },
         {
             name: 'positive',
-            count: positive,
+            count: `${positive}%`,
         }
     ]
     
     const handleButton = (input) => {
-        let new_total = total + 1
-        setTotal(new_total)
-        let new_average
         switch (input) {
             case 'good':
                 console.log('good')
-                let new_good = good + 1
-                new_average = average + 1
-                setGood(new_good)
-                setAverage(new_average)
-                setPositive(new_good / new_total * 100)
+                actions.addGood()
                 break
             
             case 'neutral':
                 console.log('neutral')
-                let new_neutral = neutral + 1
-                setNeutral(new_neutral)
-                setPositive(good / new_total * 100)
+                actions.addNeutral()
                 break
             
             case 'bad':
                 console.log('bad')
-                let new_bad = bad + 1
-                new_average = average - 1
-                setBad(new_bad)
-                setAverage(new_average)
-                setPositive(good / new_total * 100)
+                actions.addBad()
                 break
         }
     }
