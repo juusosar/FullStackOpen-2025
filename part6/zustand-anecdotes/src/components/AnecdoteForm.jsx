@@ -1,12 +1,15 @@
-import {useAnecdoteActions} from "../store.js";
+import { useAnecdoteActions, useNotificationActions } from "../store.js"
 
 const AnecdoteForm = () => {
     const { add } = useAnecdoteActions()
+    const { showNotification } = useNotificationActions()
 
     const addAnecdote = e => {
         e.preventDefault()
         const anecdote = e.target.anecdote.value
-        add(anecdote)
+        add(anecdote).then(() => {
+            showNotification(`Added \`${anecdote}\` successfully`)
+        })
         e.target.reset()
     }
 
