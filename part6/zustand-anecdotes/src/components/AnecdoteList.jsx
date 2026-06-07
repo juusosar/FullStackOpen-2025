@@ -19,7 +19,7 @@ const Anecdote = ({ anecdote }) => {
     }
 
     return (
-        <>
+        <div id={`anecdote-${anecdote.id}`}>
             <div>{anecdote.content}</div>
             <div>
                 has {anecdote.votes}
@@ -28,7 +28,7 @@ const Anecdote = ({ anecdote }) => {
                     <button onClick={() => deleteAnecdote(anecdote.id)}>delete</button>
               : null}
             </div>
-        </>
+        </div>
     )
 }
 

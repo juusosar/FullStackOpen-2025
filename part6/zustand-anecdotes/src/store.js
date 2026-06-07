@@ -6,14 +6,12 @@ const useAnecdoteStore = create((set, get) => ({
   filter: '',
   actions: {
     initialize: async () => {
-      await anecdoteService.getAll().then(anecdotes => {
-        set(() => ({ anecdotes }))
-      })
+      const anecdotes = await anecdoteService.getAll()
+      set(() => ({ anecdotes }))
     },
     add: async (anecdote) => {
-      await anecdoteService.create(anecdote).then(newAnecdote => {
+      const newAnecdote = await anecdoteService.create(anecdote)
       set(state => ({ anecdotes: state.anecdotes.concat(newAnecdote)}))
-      })
     },
     remove: async (id) => {
       await anecdoteService.remove(id).then(() => {
@@ -23,12 +21,13 @@ const useAnecdoteStore = create((set, get) => ({
     },
     addVote: async (id) => {
       const anecdote = get().anecdotes.find((a) => a.id === id)
-      await anecdoteService.vote(id, anecdote).then(updatedAnecdote => {
-        set(state => ({
-          anecdotes: state.anecdotes.map(anecdote =>
-            anecdote.id === id ? updatedAnecdote : anecdote)
-        }))
-      })},
+      const updatedAnecdote = await anecdoteService.vote(id, anecdote)
+
+      set(state => ({
+        anecdotes: state.anecdotes.map(anecdote =>
+          anecdote.id === id ? updatedAnecdote : anecdote)
+        })
+      )},
     setFilter: value => set(() => ({ filter: value }))
   },
 }))
@@ -40,7 +39,6 @@ export const useAnecdotes = () => {
   return anecdotes.filter(anecdote => anecdote.content.toLowerCase().includes(filter.toLowerCase()))
 }
 export const useAnecdoteActions = () => useAnecdoteStore((state) => state.actions)
-
 
 const useNotificationStore = create((set) => ({
   message: '',
@@ -56,4 +54,8 @@ const useNotificationStore = create((set) => ({
 }))
 
 export const useNotification = () => useNotificationStore(state => state.message)
+
 export const useNotificationActions = () => useNotificationStore(state => state.actions)
+
+
+export default useAnecdoteStore
