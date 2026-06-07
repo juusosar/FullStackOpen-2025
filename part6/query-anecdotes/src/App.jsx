@@ -1,15 +1,17 @@
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
-import {useAnecdotes} from './services/query.js';
+import { useAnecdotes } from './services/query'
+import useNotify from './hooks/useNotify'
 
 const App = () => {
   const queryClient = useAnecdotes()
-  
   console.log(queryClient)
+  const { notify } = useNotify()
   
   const handleVote = (anecdote) => {
     queryClient.addVote(anecdote.id, anecdote)
     console.log('vote')
+    notify(`added vote for anecdote \'${anecdote.content}\'`)
   }
   
   if(queryClient.isError) return <div>anecdote service not available due to problems in server</div>
